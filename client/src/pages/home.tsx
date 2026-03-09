@@ -1,115 +1,75 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
 
-type Course = {
-  id: number;
-  title: string;
-  category: string;
-  description?: string;
-};
+import Hero from "@/components/sections/hero";
+import Courses from "@/components/sections/courses";
+import Services from "@/components/sections/services";
+import Admissions from "@/components/sections/admissions";
+import About from "@/components/sections/about";
+import Contact from "@/components/sections/contact";
 
-function CourseGrid({ courses }: { courses: Course[] }) {
+export default function Home() {
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-      {courses.map((course) => (
-        <Card key={course.id} className="hover:shadow-xl transition">
+    <div className="min-h-screen">
 
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-college-dark">
-              {course.title}
-            </h3>
-          </CardHeader>
+      <Header />
 
-          <CardContent>
+      <main>
 
-            <p className="text-sm text-college-gray mb-4">
-              {course.description || "Professional training program designed to equip learners with practical skills."}
-            </p>
+        <Hero />
 
-            <Button className="bg-college-green text-white hover:bg-green-600 w-full">
-              Apply Now
-            </Button>
+        <div className="bg-yellow-50 border-l-4 border-college-green py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          </CardContent>
+            <div className="flex items-center justify-between flex-wrap gap-4">
 
-        </Card>
-      ))}
-    </div>
-  );
-}
+              <div className="flex items-center">
 
-export default function Courses() {
+                <div className="text-college-green text-2xl mr-4">
+                  📅
+                </div>
 
-  const { data: courses = [] } = useQuery<Course[]>({
-    queryKey: ["/api/courses"],
-  });
+                <div>
+                  <h3 className="text-lg font-semibold text-college-dark">
+                    Monthly Intakes Available
+                  </h3>
 
-  const professional = courses.filter((c) => c.category === "professional");
-  const youth = courses.filter((c) => c.category === "youth");
-  const parents = courses.filter((c) => c.category === "parents");
-  const children = courses.filter((c) => c.category === "children");
+                  <p className="text-college-gray">
+                    Register now for our upcoming courses starting every month
+                  </p>
+                </div>
 
-  return (
-    <section id="courses" className="py-20 bg-white">
+              </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <button
+                onClick={() => {
+                  const element = document.getElementById("admissions");
+                  if (element) element.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="bg-college-green text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors font-medium"
+              >
+                Apply Now
+              </button>
 
-        <div className="text-center mb-14">
+            </div>
 
-          <h2 className="text-3xl md:text-4xl font-bold text-college-dark mb-4">
-            Our Courses
-          </h2>
-
-          <p className="text-xl text-college-gray max-w-3xl mx-auto">
-            Professional training and empowerment programs for individuals, youth, parents and children.
-          </p>
-
+          </div>
         </div>
 
-        <Tabs defaultValue="professional">
+        <Courses />
 
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full mb-10">
+        <Services />
 
-            <TabsTrigger value="professional">
-              Professional
-            </TabsTrigger>
+        <Admissions />
 
-            <TabsTrigger value="youth">
-              Youth
-            </TabsTrigger>
+        <About />
 
-            <TabsTrigger value="parents">
-              Parents
-            </TabsTrigger>
+        <Contact />
 
-            <TabsTrigger value="children">
-              Children
-            </TabsTrigger>
+      </main>
 
-          </TabsList>
+      <Footer />
 
-          <TabsContent value="professional">
-            <CourseGrid courses={professional} />
-          </TabsContent>
-
-          <TabsContent value="youth">
-            <CourseGrid courses={youth} />
-          </TabsContent>
-
-          <TabsContent value="parents">
-            <CourseGrid courses={parents} />
-          </TabsContent>
-
-          <TabsContent value="children">
-            <CourseGrid courses={children} />
-          </TabsContent>
-
-        </Tabs>
-
-      </div>
-
-    </section>
+    </div>
   );
 }
