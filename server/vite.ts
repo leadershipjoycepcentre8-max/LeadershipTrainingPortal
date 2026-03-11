@@ -19,6 +19,10 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+/*
+  DEVELOPMENT MODE
+  Runs Vite middleware with hot reload
+*/
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
@@ -41,6 +45,7 @@ export async function setupVite(app: Express, server: Server) {
   });
 
   app.use(vite.middlewares);
+
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
@@ -49,16 +54,18 @@ export async function setupVite(app: Express, server: Server) {
         import.meta.dirname,
         "..",
         "client",
-        "index.html",
+        "index.html"
       );
 
-      // always reload the index.html file from disk incase it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
+
       template = template.replace(
         `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${nanoid()}"`,
+        `src="/src/main.tsx?v=${nanoid()}"`
       );
+
       const page = await vite.transformIndexHtml(url, template);
+
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
@@ -67,8 +74,11 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
+/*
+  PRODUCTION MODE
+  Serves built frontend
+*/
 export function serveStatic(app: Express) {
-  // correct build folder
   const distPath = path.resolve(import.meta.dirname, "../dist/public");
 
   if (!fs.existsSync(distPath)) {
@@ -77,10 +87,13 @@ export function serveStatic(app: Express) {
     );
   }
 
-  // serve static files
+  // Serve assets correctly (JS, CSS, images)
+  app.use("/assets", express.static(path.join(distPath, "assets")));
+
+  // Serve other static files
   app.use(express.static(distPath));
 
-  // return index.html for all routes
+  // Fallback for React / SPA routes
   app.get("*", (_req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
