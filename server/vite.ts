@@ -20,8 +20,8 @@ export function log(message: string, source = "express") {
 }
 
 /*
-  DEVELOPMENT MODE
-  Runs Vite middleware with hot reload
+DEVELOPMENT MODE
+Runs Vite middleware with hot reload
 */
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
@@ -33,6 +33,8 @@ export async function setupVite(app: Express, server: Server) {
   const vite = await createViteServer({
     ...viteConfig,
     configFile: false,
+    server: serverOptions,
+    appType: "custom",
     customLogger: {
       ...viteLogger,
       error: (msg, options) => {
@@ -40,8 +42,6 @@ export async function setupVite(app: Express, server: Server) {
         process.exit(1);
       },
     },
-    server: serverOptions,
-    appType: "custom",
   });
 
   app.use(vite.middlewares);
@@ -51,8 +51,7 @@ export async function setupVite(app: Express, server: Server) {
 
     try {
       const clientTemplate = path.resolve(
-        import.meta.dirname,
-        "..",
+        process.cwd(),
         "client",
         "index.html"
       );
@@ -75,11 +74,11 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 /*
-  PRODUCTION MODE
-  Serves built frontend
+PRODUCTION MODE
+Serves built frontend
 */
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(process.cwd(), "dist/public");
+  const distPath = path.resolve(process.cwd(), "dist");
 
   if (!fs.existsSync(distPath)) {
     console.error("DIST PATH NOT FOUND:", distPath);
@@ -88,7 +87,7 @@ export function serveStatic(app: Express) {
 
   const assetsPath = path.join(distPath, "assets");
 
-  // serve JS / CSS / images
+  // serve assets (js, css, images)
   app.use("/assets", express.static(assetsPath));
 
   // serve other static files
@@ -103,4 +102,3 @@ export function serveStatic(app: Express) {
     res.sendFile(path.join(distPath, "index.html"));
   });
 }
-    
