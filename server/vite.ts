@@ -80,6 +80,7 @@ export async function setupVite(app: Express, server: Server) {
 */
 export function serveStatic(app: Express) {
   const distPath = path.resolve(import.meta.dirname, "../dist/public");
+  const assetsPath = path.join(distPath, "assets");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
@@ -87,14 +88,26 @@ export function serveStatic(app: Express) {
     );
   }
 
-  // Serve assets correctly (JS, CSS, images)
-  app.use("/assets", express.static(path.join(distPath, "assets")));
+  // Serve Vite assets FIRST
+  app.use(
+    "/assets",
+    express.static(assetsPath, {
+      setHeaders: (res) => {
+        res.setHeader("Content-Type", "application/javascript");
+      },
+    })
+  );
 
   // Serve other static files
   app.use(express.static(distPath));
 
-  // Fallback for React / SPA routes
-  app.get("*", (_req, res) => {
+  // SPA fallback
+  app.get("*", (req, res) => {
+    if (req.path.startsWith("/assets")) {
+      return res.status(404).end();
+    }
+
     res.sendFile(path.join(distPath, "index.html"));
   });
 }
+    
