@@ -79,26 +79,19 @@ export async function setupVite(app: Express, server: Server) {
   Serves built frontend
 */
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "../dist/public");
-  const assetsPath = path.join(distPath, "assets");
+  const distPath = path.resolve(process.cwd(), "dist/public");
 
   if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Build folder not found: ${distPath}. Run npm run build first.`
-    );
+    console.error("DIST PATH NOT FOUND:", distPath);
+    throw new Error("Run npm run build first");
   }
 
-  // Serve Vite assets FIRST
-  app.use(
-    "/assets",
-    express.static(assetsPath, {
-      setHeaders: (res) => {
-        res.setHeader("Content-Type", "application/javascript");
-      },
-    })
-  );
+  const assetsPath = path.join(distPath, "assets");
 
-  // Serve other static files
+  // serve JS / CSS / images
+  app.use("/assets", express.static(assetsPath));
+
+  // serve other static files
   app.use(express.static(distPath));
 
   // SPA fallback
